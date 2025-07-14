@@ -375,20 +375,24 @@ class BombermanGameEngine {
         // Create explosion at bomb position
         this.createExplosion(bomb.gridX, bomb.gridY);
 
-        directions.forEach(dir => {
-            const exploX = bomb.gridX + dir.dx;
-            const exploY = bomb.gridY + dir.dy;
+        for (let dir of directions) {
+            for (let r = 1; r <= bomb.range; r++) {
+                const exploX = bomb.gridX + dir.dx * r;
+                const exploY = bomb.gridY + dir.dy * r;
 
-            if (this.mapArray[exploY] && 
-                this.mapArray[exploY][exploX] && 
-                this.mapArray[exploY][exploX] !== 0) {
-                this.createExplosion(exploX, exploY);
+                if (this.mapArray[exploY] && 
+                    this.mapArray[exploY][exploX] && 
+                    this.mapArray[exploY][exploX] !== 0) {
+                    this.createExplosion(exploX, exploY);
+                } else {
+                    break; // Stop if wall or out of bounds
+                }
             }
-        });
+        }
 
         // Handle bomb interactions
-        this.bombBricks(bomb.gridX, bomb.gridY);
-        this.bombPlayers(bomb.gridX, bomb.gridY);
+        this.bombBricks(bomb);
+        this.bombPlayers(bomb);
     }
 
     createExplosion(gridX, gridY) {
@@ -403,7 +407,7 @@ class BombermanGameEngine {
         this.explosions.set(explosionId, explosion);
     }
 
-    bombBricks(bombGridX, bombGridY) {
+    bombBricks(bomb) {
         const directions = [
             { dx: 0, dy: 1 },   // Down
             { dx: 1, dy: 0 },   // Right
@@ -412,26 +416,34 @@ class BombermanGameEngine {
         ];
 
         directions.forEach(dir => {
-            const brickX = bombGridX + dir.dx;
-            const brickY = bombGridY + dir.dy;
+            for (let r = 1; r <= bomb.range; r++) {
+                const brickX = bomb.gridX + dir.dx * r;
+                const brickY = bomb.gridY + dir.dy * r;
 
-            if (this.mapArray[brickY] && this.mapArray[brickY][brickX] === 2) {
-                // Destroy the block
-                this.mapArray[brickY][brickX] = 1;
-                
-                // Chance to spawn power-up
-                if (Math.random() < 0.3) {
-                    this.spawnPowerUp(brickX, brickY);
+                // out if bound ?? stop
+                if (!this.mapArray[brickY] || !this.mapArray[brickY][brickX]) break;
+
+                // Stop if wall (0)
+                if (this.mapArray[brickY][brickX] === 0) break;
+
+                // If destructible block (2), destroy and maybe spawn power-up, then stop
+                if (this.mapArray[brickY][brickX] === 2) {
+                    this.mapArray[brickY][brickX] = 1;
+                    if (Math.random() < 0.3) {
+                        this.spawnPowerUp(brickX, brickY);
+                    }
+                    break;
                 }
+                // if green or starting position continu untiol some condetions up 
             }
         });
     }
 
-    bombPlayers(bombGridX, bombGridY) {
+    bombPlayers(bomb) {
         // Check if bomb hits the player at bomb position
-        this.checkPlayerHit(bombGridX, bombGridY);
-        
-        // Check explosion in four directions
+        this.checkPlayerHit(bomb.gridX, bomb.gridY);
+
+        // Check explosion in four directions up to bomb.range
         const directions = [
             { dx: 0, dy: 1 },   // Down
             { dx: 1, dy: 0 },   // Right
@@ -440,9 +452,21 @@ class BombermanGameEngine {
         ];
 
         directions.forEach(dir => {
-            const exploX = bombGridX + dir.dx;
-            const exploY = bombGridY + dir.dy;
-            this.checkPlayerHit(exploX, exploY);
+            for (let r = 1; r <= bomb.range; r++) {
+                const exploX = bomb.gridX + dir.dx * r;
+                const exploY = bomb.gridY + dir.dy * r;
+
+                // Stop if out of bounds
+                if (!this.mapArray[exploY] || !this.mapArray[exploY][exploX]) break;
+
+                // Stop if wall (0)
+                if (this.mapArray[exploY][exploX] === 0) break;
+
+                this.checkPlayerHit(exploX, exploY);
+
+                // Stop after hitting a destructible block
+                if (this.mapArray[exploY][exploX] === 2) break;
+            }
         });
     }
 
@@ -459,7 +483,7 @@ class BombermanGameEngine {
         player.lives--;
          if (player.lives <= 0) {
             // Player is dead
-            player.currentDirection = 'destroy';
+            player.currentDirection = 'destroy-hero';
             // Remove player after animation
             setTimeout(() => {
                 this.players.delete(player.id);
