@@ -8,11 +8,17 @@ class BombermanGameEngine {
         this.tileSize = 32;
         this.gameStatus = 'waiting'; // waiting, playing, finished
         this.gameLoop = null;
+        this.stepsPerFrame=5
+        this.frameIndex=0
+        this.stepCount=0
+        this.stepCount=0
+        this.stepCount=0
         this.lastUpdate = Date.now();
         
         // Initialize map
         this.initializeMap();
     }
+
 
     initializeMap() {
         // Use your original map structure (25x21)
@@ -77,9 +83,9 @@ class BombermanGameEngine {
                 isMoving: false,
                 currentDirection: 'up',
                 lives: 3,
-                maxBombs: 1,
+                maxBombs: 4,
                 bombRange: 1,
-                speed: 3,
+                speed: 2,
                 pressedDirections: [],
                 frameIndex: 0,
                 stepCount: 0,
@@ -102,8 +108,7 @@ class BombermanGameEngine {
 
         switch (action) {
             case 'MOVE':
-                console.log("mooooooooove")
-                this.handleMovement(player, key);
+                 this.handleMovement(player, key);
                 break;
             case 'KEY_RELEASE':
                 this.handleKeyRelease(player, key);
@@ -119,8 +124,7 @@ class BombermanGameEngine {
         if (!player.pressedDirections.includes(key)) {
             player.pressedDirections.push(key);
         }
-        console.log(key,"keeey")
-
+ 
         // Set direction based on key
         switch (key) {
             case 'arrowup':
@@ -161,16 +165,14 @@ class BombermanGameEngine {
         if (player.pressedDirections.length === 0) return;
         
         
-        // console.log("@@@@@@@",this.mapArray[gridY][gridX])
-
+ 
 
 
 
         const direction = player.pressedDirections[player.pressedDirections.length - 1];
         let nextGridX = player.gridX;
         let nextGridY = player.gridY;
-        console.log(player.pressedDirections[player.pressedDirections.length - 1],"fxxxxkl")
- 
+  
         
 
         switch (direction) {
@@ -189,19 +191,15 @@ class BombermanGameEngine {
         }
 
         if (this.canMove(player, nextGridX, nextGridY)) {
-            console.log("kan move a ikhaaan",nextGridX,nextGridY)
-            player.nextPixelX = nextGridX * this.tileSize;
+             player.nextPixelX = nextGridX * this.tileSize;
             player.nextPixelY = nextGridY * this.tileSize;
             player.isMoving = true;
         }
     }
 
     canMove(player, nextGridX, nextGridY) {
-        // console.log("@@@@@@@",this.mapArray[nextGridY][nextGridX])
-        // Check map boundaries
-        console.log("txeker west can move ",nextGridX,nextGridY)
-        console.log("hakak a rwiiijl",this.mapArray[nextGridY][nextGridX])
-
+         // Check map boundaries
+ 
         if (nextGridX < 0 || nextGridY < 0 || 
             nextGridY >= this.mapArray.length || 
             nextGridX >= this.mapArray[0].length) {
@@ -240,6 +238,11 @@ class BombermanGameEngine {
     }
 
     placeBomb(player) {
+        const activeBombs = Array.from(this.bombs.values()).filter(bomb => bomb.playerId === player.id).length;
+        if (activeBombs >= player.maxBombs) {
+            return
+            //dont place any boomb if max acheved 
+        }
         // Check if there's already a bomb at this position
         const bombAtPosition = Array.from(this.bombs.values()).find(bomb => 
             bomb.gridX === player.gridX && bomb.gridY === player.gridY
@@ -283,7 +286,7 @@ class BombermanGameEngine {
             if (bomb.timer <= 0) {
                 this.explodeBomb(bomb);
                 this.bombs.delete(bombId);
-            }
+             }
         });
 
         // Update explosions
@@ -296,8 +299,7 @@ class BombermanGameEngine {
     }
 
     updatePlayerMovement(player, deltaTime) {
-        // console.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvv")
-        const diffX = Math.abs(player.pixelX - player.nextPixelX);
+         const diffX = Math.abs(player.pixelX - player.nextPixelX);
         const diffY = Math.abs(player.pixelY - player.nextPixelY);
 
         // Move towards target position
@@ -315,10 +317,11 @@ class BombermanGameEngine {
         }
 
         // Update animation
-        player.stepCount++;
-        if (player.stepCount > player.stepsPerFrame) {
-            player.stepCount = 0;
-            player.frameIndex = (player.frameIndex + 1) % 3;
+    
+        this.stepCount++;
+        if (this.stepCount > this.stepsPerFrame) {
+            this.stepCount = 0;
+            this.frameIndex = (this.frameIndex + 1) % 3;
         }
 
         // Check if movement is complete
@@ -329,6 +332,29 @@ class BombermanGameEngine {
             player.gridY = Math.floor(player.pixelY / this.tileSize);
             player.isMoving = false;
             
+                 //powerup collection logic  
+            //
+            let collectedPowerUpId = null;
+            for (const [powerUpId, powerUp] of this.powerUps.entries()) {
+                if (powerUp.gridX === player.gridX && powerUp.gridY === player.gridY) {
+                    console.log("powerup collected",powerUp)
+                     // power effet based on type of the power up
+                    if (powerUp.type === 'bombx') {
+                        player.maxBombs += 1;
+                    } else if (powerUp.type === 'flame') {
+                        player.bombRange += 1;
+                    } else if (powerUp.type === 'speed') {
+                        player.speed += 1;
+                    }
+                    collectedPowerUpId = powerUpId;
+                    break;
+                }
+            }
+            if (collectedPowerUpId) {
+                this.powerUps.delete(collectedPowerUpId);
+            }
+
+
             // Try to continue movement
             this.tryToMove(player);
         }
@@ -431,8 +457,7 @@ class BombermanGameEngine {
 
     damagePlayer(player) {
         player.lives--;
-        console.log("xxxxxxxxxxxxxxxxxxxxx,damage --",player)
-        if (player.lives <= 0) {
+         if (player.lives <= 0) {
             // Player is dead
             player.currentDirection = 'destroy';
             // Remove player after animation

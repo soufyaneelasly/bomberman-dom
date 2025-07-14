@@ -400,7 +400,7 @@ class BombermanGameEngine {
                 bombRange: 1,
                 speed: 4,
                 pressedDirections: [],
-                frameIndex: 0,
+                frameIndex: 2,
                 stepCount: 0,
                 stepsPerFrame: 5
             };

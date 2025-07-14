@@ -26,6 +26,7 @@ class BombermanGame {
         });
         
         this.initializeGame();
+        this.localPlayerFrames = {}; // traaacking  animation fram and timer for eache player  
     }
 
     initializeGame() {
@@ -127,9 +128,10 @@ class BombermanGame {
         blockImage.src = '/assets/block.png';
         greenBlockImage.src = '/assets/greenBlock.png';
 
-        // If this is the first time, create the entire map
+        // If this is the first time>:::: create the entire map
         if (this.previousMapArray.length === 0) {
-            // Clear existing map elements
+            // Clear existen map element 
+            
             const existingBlocks = this.container.querySelectorAll('[data-map-element]');
             existingBlocks.forEach(element => element.remove());
 
@@ -233,7 +235,8 @@ class BombermanGame {
         element.style.overflow = 'hidden';
         element.style.zIndex = '10';
         
-        // Smooth movement with CSS transitions
+        // somth animation whit css
+        
         element.style.transition = 'transform 0.1s ease-out';
         element.style.transform = `translate3d(${player.pixelX}px, ${player.pixelY}px, 2px)`;
 
@@ -241,6 +244,14 @@ class BombermanGame {
         const spritePath = `/assets/move_${player.currentDirection}.png`;
         element.style.backgroundImage = `url(${spritePath})`;
         element.style.backgroundSize = 'cover';
+
+        // Animation: set backgroundPosition based on frame
+        const key = player.id || player.nickname;
+        let frameIndex = 0;
+        if (this.localPlayerFrames && this.localPlayerFrames[key]) {
+            frameIndex = this.localPlayerFrames[key].frame;
+        }
+        element.style.backgroundPosition = `-${frameIndex * 32}px 0px`;
 
         // Add nickname
         const nicknameElement = document.createElement('div');
@@ -303,7 +314,7 @@ class BombermanGame {
     }
 
     renderExplosions() {
-        // Clear existing explosion elements
+        // Clear older expolostion
         const existingExplosions = this.container.querySelectorAll('.explosion');
         existingExplosions.forEach(element => element.remove());
 
@@ -337,7 +348,33 @@ class BombermanGame {
 
     updateGame(deltaTime) {
         // All game logic is now handled on the server
-        // This method is mainly for any client-side animations or effects
+        // this is just for any extra animation on the client side 
+        // We'll use this for local animation frame updates
+        const ANIMATION_FRAME_COUNT = 3;
+        const ANIMATION_FRAME_DURATION = 100; // ms per frame
+        if (!this.lastAnimationUpdate) this.lastAnimationUpdate = 0;
+        this.lastAnimationUpdate += deltaTime;
+        if (this.lastAnimationUpdate >= ANIMATION_FRAME_DURATION) {
+            this.lastAnimationUpdate = 0;
+            this.gameState.players.forEach(player => {
+                // Use player.id or player.nickname as unique key
+                const key = player.id || player.nickname;
+                if (!this.localPlayerFrames[key]) {
+                    this.localPlayerFrames[key] = { frame: 0, lastX: player.pixelX, lastY: player.pixelY, moving: false };
+                }
+                const frameData = this.localPlayerFrames[key];
+                // Detect movement
+                const isMoving = (player.pixelX !== frameData.lastX || player.pixelY !== frameData.lastY);
+                if (isMoving) {
+                    frameData.frame = (frameData.frame + 1) % ANIMATION_FRAME_COUNT;
+                } else {
+                    frameData.frame = 0; // Reset to first frame if idle
+                }
+                frameData.lastX = player.pixelX;
+                frameData.lastY = player.pixelY;
+                frameData.moving = isMoving;
+            });
+        }
     }
 
     renderGame() {
@@ -359,5 +396,6 @@ class BombermanGame {
     }
 }
 
-// Export for use in main.js
+// Export for use >>> main.js
+
 window.BombermanGame = BombermanGame; 
