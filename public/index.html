@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bomberman DOM</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Nickname Screen -->
+        <div id="nickname-screen" class="screen active">
+            <div class="container">
+                <h1>Bomberman DOM</h1>
+                <div class="nickname-form">
+                    <input type="text" id="nickname-input" placeholder="Enter your nickname" maxlength="20">
+                    <button id="join-btn">Join Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Waiting Room Screen -->
+        <div id="waiting-room" class="screen">
+            <div class="container">
+                <h2>Waiting Room</h2>
+                <div class="player-counter">
+                    <span id="player-count">0</span> / 4 Players
+                </div>
+                <div class="countdown" id="countdown" style="display: none;">
+                    Game starting in <span id="countdown-timer">10</span> seconds
+                </div>
+                
+                <div class="players-list" id="players-list">
+                    <!-- Players will be added here dynamically -->
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Chat messages will appear here -->
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input" placeholder="Type a message...">
+                        <button id="send-chat-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-container">
+                <div class="game-info">
+                    <div class="player-info">
+                        <span>Players Alive: </span>
+                        <span id="alive-count">4</span>
+                    </div>
+                    <div class="fps-counter">
+                        <span>FPS: </span>
+                        <span id="fps-display">60</span>
+                    </div>
+                </div>
+                <div id="game-canvas">
+                    <!-- Game will be rendered here using your framework -->
+                </div>
+                <div class="game-chat">
+                    <div class="game-chat-messages" id="game-chat-messages"></div>
+                    <div class="game-chat-input">
+                        <input type="text" id="game-chat-input" placeholder="Chat...">
+                        <button id="game-send-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Framework -->
+    <script src="js/framework.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 

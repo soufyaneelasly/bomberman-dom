@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smooth Movement Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .game-area {
+            width: 800px;
+            height: 672px;
+            border: 3px solid #333;
+            margin: 20px auto;
+            position: relative;
+            background: #2c3e50;
+            overflow: hidden;
+        }
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .metric {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            border-left: 3px solid #667eea;
+        }
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎮 Smooth Movement Test</h1>
+        
+        <div class="info">
+            <h3>🚀 Improved Movement Features:</h3>
+            <ul>
+                <li><strong>Controlled Speed:</strong> Player speed set to 2 for smooth, controlled movement</li>
+                <li><strong>Throttled Input:</strong> Movement throttled to 150ms to prevent rapid movement</li>
+                <li><strong>DeltaTime Animation:</strong> Smooth animation based on frame time (30fps)</li>
+                <li><strong>Slow Sprite Animation:</strong> Much slower sprite changes (15 steps per frame)</li>
+                <li><strong>Movement-Only Animation:</strong> Sprites only animate when player is moving</li>
+                <li><strong>Reduced WebSocket Spam:</strong> Less frequent server communication</li>
+            </ul>
+        </div>
+        
+        <div class="status info">
+            <div id="status-display">Loading smooth movement test...</div>
+        </div>
+        
+        <div class="game-area" id="smooth-test">
+            <!-- Smooth test will be rendered here -->
+        </div>
+        
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-value" id="fps-display">0</div>
+                <div>FPS</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="player-speed">4</div>
+                <div>Player Speed</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="player-position">1,1</div>
+                <div>Position</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="is-moving">No</div>
+                <div>Moving</div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3>🎮 Test Instructions:</h3>
+            <p><strong>Movement:</strong> Use WASD or Arrow Keys to test smooth movement</p>
+            <p><strong>Bomb:</strong> Press Space to place bombs and test collision</p>
+            <p><strong>Goal:</strong> Notice the smooth, responsive movement without lag or stuttering</p>
+        </div>
+    </div>
+
+    <!-- Load Framework and Game -->
+    <script src="js/framework.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/game.js"></script>
+    
+    <script>
+        let smoothTest;
+
+        // Initialize test
+        document.addEventListener('DOMContentLoaded', () => {
+            const framework = window.Framework;
+            framework.init();
+            
+            // Initialize smooth test
+            smoothTest = new BombermanGame(document.getElementById('smooth-test'), {
+                send: (data) => {
+                    // Only log bomb placements, not movement spam
+                    if (data.action === 'PLACE_BOMB') {
+                        console.log('Bomb placed:', data);
+                    }
+                }
+            });
+            
+            // Start the test
+            setTimeout(() => {
+                smoothTest.start();
+                updateMetrics();
+                document.getElementById('status-display').textContent = '✅ Smooth movement test ready! Use WASD to test movement.';
+            }, 1000);
+        });
+
+        function updateMetrics() {
+            setInterval(() => {
+                const framework = window.Framework;
+                const firstPlayer = smoothTest.players.values().next().value;
+                
+                document.getElementById('fps-display').textContent = framework.getFPS();
+                document.getElementById('player-speed').textContent = firstPlayer ? firstPlayer.speed : 2;
+                document.getElementById('player-position').textContent = firstPlayer ? `${firstPlayer.gridX},${firstPlayer.gridY}` : '1,1';
+                document.getElementById('is-moving').textContent = firstPlayer && firstPlayer.isMoving ? 'Yes' : 'No';
+            }, 1000);
+        }
+
+        // Override console.log to reduce spam
+        const originalLog = console.log;
+        console.log = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('WebSocket')) {
+                return; // Don't log WebSocket messages
+            }
+            originalLog.apply(console, args);
+        };
+    </script>
+</body>
+</html> 

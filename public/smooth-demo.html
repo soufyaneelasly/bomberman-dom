@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smooth Bomb & Movement Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .game-area {
+            width: 800px;
+            height: 672px;
+            border: 3px solid #333;
+            margin: 20px auto;
+            position: relative;
+            background: #2c3e50;
+            overflow: hidden;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #5a6fd8;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .metric {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            border-left: 3px solid #667eea;
+        }
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🎮 Smooth Bomb & Movement Demo</h1>
+        
+        <div class="info">
+            <h3>🚀 Features Inspired by Your Single-Player Version:</h3>
+            <div class="feature-list">
+                <div class="feature-card">
+                    <h4>💣 Bomb Placement</h4>
+                    <p>Bombs block movement until they explode after 2 seconds</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🎯 Smooth Movement</h4>
+                    <p>Grid-based movement with pixel interpolation</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🚫 Collision Detection</h4>
+                    <p>Players cannot walk through bombs or walls</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⏱️ Bomb Timer</h4>
+                    <p>2-second bomb timer with explosion effects</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔄 Position Blocking</h4>
+                    <p>Bomb positions are blocked until explosion</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🎭 Directional Sprites</h4>
+                    <p>Player sprites change based on movement direction</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status info">
+            <div id="status-display">Loading smooth movement demo...</div>
+        </div>
+        
+        <div class="game-area" id="smooth-demo">
+            <!-- Smooth demo will be rendered here -->
+        </div>
+        
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-value" id="bombs-display">0</div>
+                <div>Active Bombs</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="blocked-positions">0</div>
+                <div>Blocked Positions</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="player-position">1,1</div>
+                <div>Player Position</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="fps-display">0</div>
+                <div>FPS</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <h3>🎮 Demo Controls</h3>
+            <p><strong>Movement:</strong> WASD or Arrow Keys (Grid-based movement)</p>
+            <p><strong>Bomb:</strong> Spacebar or Enter (2-second timer)</p>
+            <p><strong>Test:</strong> Place bombs and try to move through them - you can't until they explode!</p>
+            
+            <button class="test-button" onclick="testBombBlocking()">Test Bomb Blocking</button>
+            <button class="test-button" onclick="testSmoothMovement()">Test Smooth Movement</button>
+            <button class="test-button" onclick="resetDemo()">Reset Demo</button>
+        </div>
+        
+        <div class="info">
+            <h3>🔧 Technical Implementation</h3>
+            <ul>
+                <li><strong>blockPosition():</strong> Marks grid position as blocked by bomb</li>
+                <li><strong>unblockPosition():</strong> Removes block after bomb explosion</li>
+                <li><strong>isPositionBlocked():</strong> Checks if position is blocked</li>
+                <li><strong>canMove():</strong> Validates movement including bomb blocks</li>
+                <li><strong>movePlayer():</strong> Smooth pixel interpolation between grid positions</li>
+                <li><strong>tryToMove():</strong> Attempts movement with collision detection</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Load Framework and Game -->
+    <script src="js/framework.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/game.js"></script>
+    
+    <script>
+        let smoothDemo;
+        let demoStats = {
+            bombs: 0,
+            blockedPositions: 0,
+            playerPosition: '1,1'
+        };
+
+        // Initialize demo
+        document.addEventListener('DOMContentLoaded', () => {
+            const framework = window.Framework;
+            framework.init();
+            
+            // Initialize smooth demo
+            smoothDemo = new BombermanGame(document.getElementById('smooth-demo'), {
+                send: (data) => {
+                    console.log('Smooth demo WebSocket:', data);
+                }
+            });
+            
+            // Start the demo
+            setTimeout(() => {
+                smoothDemo.start();
+                updateMetrics();
+                document.getElementById('status-display').textContent = '🎮 Smooth movement demo ready! Place bombs and try to move through them.';
+            }, 1000);
+        });
+
+        function updateMetrics() {
+            setInterval(() => {
+                const framework = window.Framework;
+                document.getElementById('bombs-display').textContent = smoothDemo.bombs.size;
+                document.getElementById('blocked-positions').textContent = smoothDemo.blockedPositions ? smoothDemo.blockedPositions.size : 0;
+                document.getElementById('fps-display').textContent = framework.getFPS();
+                
+                // Update player position
+                const firstPlayer = smoothDemo.players.values().next().value;
+                if (firstPlayer) {
+                    document.getElementById('player-position').textContent = `${firstPlayer.gridX},${firstPlayer.gridY}`;
+                }
+            }, 1000);
+        }
+
+        function testBombBlocking() {
+            const firstPlayer = smoothDemo.players.values().next().value;
+            if (firstPlayer) {
+                // Place a bomb
+                smoothDemo.placeBomb();
+                
+                // Try to move through the bomb position
+                setTimeout(() => {
+                    const originalX = firstPlayer.gridX;
+                    const originalY = firstPlayer.gridY;
+                    
+                    // Try to move to bomb position
+                    firstPlayer.gridX = firstPlayer.gridX + 1;
+                    firstPlayer.gridY = firstPlayer.gridY;
+                    
+                    if (!smoothDemo.canMove(firstPlayer, firstPlayer.gridX, firstPlayer.gridY)) {
+                        document.getElementById('status-display').textContent = '✅ Bomb blocking working! Player cannot move through bomb position.';
+                        // Reset position
+                        firstPlayer.gridX = originalX;
+                        firstPlayer.gridY = originalY;
+                    } else {
+                        document.getElementById('status-display').textContent = '❌ Bomb blocking failed! Player can move through bomb.';
+                    }
+                }, 500);
+            }
+        }
+
+        function testSmoothMovement() {
+            const firstPlayer = smoothDemo.players.values().next().value;
+            if (firstPlayer) {
+                // Test smooth movement in a pattern
+                const movements = ['right', 'down', 'left', 'up'];
+                let currentIndex = 0;
+                
+                const moveInterval = setInterval(() => {
+                    if (currentIndex < movements.length) {
+                        smoothDemo.tryToMove(firstPlayer, movements[currentIndex]);
+                        currentIndex++;
+                    } else {
+                        clearInterval(moveInterval);
+                        document.getElementById('status-display').textContent = '✅ Smooth movement test completed!';
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetDemo() {
+            // Reset demo
+            smoothDemo.stop();
+            setTimeout(() => {
+                smoothDemo = new BombermanGame(document.getElementById('smooth-demo'), {
+                    send: (data) => {
+                        console.log('Smooth demo WebSocket:', data);
+                    }
+                });
+                smoothDemo.start();
+                document.getElementById('status-display').textContent = '🔄 Demo reset! Ready for smooth movement and bomb testing.';
+            }, 1000);
+        }
+
+        // Override console.log to show demo messages
+        const originalLog = console.log;
+        console.log = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('WebSocket')) {
+                // Don't log WebSocket messages to avoid spam
+                return;
+            }
+            originalLog.apply(console, args);
+        };
+    </script>
+</body>
+</html> 

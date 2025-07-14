@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bomb Interaction Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .game-area {
+            width: 800px;
+            height: 672px;
+            border: 3px solid #333;
+            margin: 20px auto;
+            position: relative;
+            background: #2c3e50;
+            overflow: hidden;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #5a6fd8;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .metric {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            border-left: 3px solid #667eea;
+        }
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>💥 Bomb Interaction Test</h1>
+        
+        <div class="info">
+            <h3>🧪 Testing Bomb Mechanics (Inspired by Your Single-Player Version)</h3>
+            <ul>
+                <li><strong>Bomb vs Bricks:</strong> Bombs destroy destructible blocks (type 2)</li>
+                <li><strong>Bomb vs Players:</strong> Bombs damage players in explosion range</li>
+                <li><strong>Score System:</strong> +100 points for each destroyed block</li>
+                <li><strong>Power-ups:</strong> 30% chance to spawn power-up when block is destroyed</li>
+                <li><strong>Animation:</strong> Block destruction animation with frame-by-frame</li>
+                <li><strong>Player Death:</strong> Players die and are removed after 200ms animation</li>
+            </ul>
+        </div>
+        
+        <div class="status info">
+            <div id="status-display">Loading bomb interaction test...</div>
+        </div>
+        
+        <div class="game-area" id="bomb-test">
+            <!-- Bomb test will be rendered here -->
+        </div>
+        
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-value" id="score-display">0</div>
+                <div>Score</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="bombs-display">0</div>
+                <div>Bombs</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="blocks-destroyed">0</div>
+                <div>Blocks Destroyed</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="players-alive">4</div>
+                <div>Players Alive</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <h3>🎮 Test Controls</h3>
+            <p><strong>Movement:</strong> WASD or Arrow Keys (Grid-based movement)</p>
+            <p><strong>Bomb:</strong> Spacebar or Enter (2-second timer)</p>
+            <p><strong>Test:</strong> Place bombs near blocks and players to test interactions</p>
+            
+            <button class="test-button" onclick="testBombPlacement()">Test Bomb Placement</button>
+            <button class="test-button" onclick="testBlockDestruction()">Test Block Destruction</button>
+            <button class="test-button" onclick="testPlayerDamage()">Test Player Damage</button>
+            <button class="test-button" onclick="resetTest()">Reset Test</button>
+        </div>
+        
+        <div class="info">
+            <h3>🔧 Technical Implementation</h3>
+            <ul>
+                <li><strong>bombBricks():</strong> Checks 4 directions for destructible blocks</li>
+                <li><strong>bombPlayers():</strong> Checks explosion range for player collision</li>
+                <li><strong>destroyBlock():</strong> Animates block destruction with frame-by-frame</li>
+                <li><strong>damagePlayer():</strong> Reduces lives, changes sprite, removes after 200ms</li>
+                <li><strong>addScore():</strong> Updates score and UI (+100 per destroyed block)</li>
+                <li><strong>spawnPowerUp():</strong> 30% chance to spawn bomb/flame/speed power-up</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Load Framework and Game -->
+    <script src="js/framework.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/game.js"></script>
+    
+    <script>
+        let bombTest;
+        let testStats = {
+            score: 0,
+            bombsPlaced: 0,
+            blocksDestroyed: 0,
+            playersAlive: 4
+        };
+
+        // Initialize test
+        document.addEventListener('DOMContentLoaded', () => {
+            const framework = window.Framework;
+            framework.init();
+            
+            // Initialize bomb test
+            bombTest = new BombermanGame(document.getElementById('bomb-test'), {
+                send: (data) => {
+                    console.log('Bomb test WebSocket:', data);
+                }
+            });
+            
+            // Start the test
+            setTimeout(() => {
+                bombTest.start();
+                updateMetrics();
+                document.getElementById('status-display').textContent = '💥 Bomb interaction test ready! Place bombs near blocks and players.';
+            }, 1000);
+        });
+
+        function updateMetrics() {
+            setInterval(() => {
+                document.getElementById('score-display').textContent = testStats.score;
+                document.getElementById('bombs-display').textContent = bombTest.bombs.size;
+                document.getElementById('blocks-destroyed').textContent = testStats.blocksDestroyed;
+                document.getElementById('players-alive').textContent = bombTest.players.size;
+            }, 1000);
+        }
+
+        function testBombPlacement() {
+            const firstPlayer = bombTest.players.values().next().value;
+            if (firstPlayer) {
+                bombTest.placeBomb();
+                testStats.bombsPlaced++;
+                document.getElementById('status-display').textContent = '💣 Bomb placed! Watch for explosion in 2 seconds.';
+            }
+        }
+
+        function testBlockDestruction() {
+            // Find a destructible block and place bomb near it
+            const firstPlayer = bombTest.players.values().next().value;
+            if (firstPlayer) {
+                // Move player to a position near blocks
+                const blockPositions = [
+                    { x: 2, y: 2 },
+                    { x: 4, y: 2 },
+                    { x: 6, y: 2 }
+                ];
+                
+                const randomBlock = blockPositions[Math.floor(Math.random() * blockPositions.length)];
+                firstPlayer.gridX = randomBlock.x - 1;
+                firstPlayer.gridY = randomBlock.y;
+                firstPlayer.pixelX = firstPlayer.gridX * 32;
+                firstPlayer.pixelY = firstPlayer.gridY * 32;
+                
+                setTimeout(() => {
+                    bombTest.placeBomb();
+                    document.getElementById('status-display').textContent = '🧱 Testing block destruction! Bomb placed near destructible block.';
+                }, 500);
+            }
+        }
+
+        function testPlayerDamage() {
+            // Place bombs near players to test damage
+            const players = Array.from(bombTest.players.values());
+            if (players.length > 1) {
+                const targetPlayer = players[1]; // Second player
+                const firstPlayer = players[0];
+                
+                // Move first player near second player
+                firstPlayer.gridX = targetPlayer.gridX + 1;
+                firstPlayer.gridY = targetPlayer.gridY;
+                firstPlayer.pixelX = firstPlayer.gridX * 32;
+                firstPlayer.pixelY = firstPlayer.gridY * 32;
+                
+                setTimeout(() => {
+                    bombTest.placeBomb();
+                    document.getElementById('status-display').textContent = '💥 Testing player damage! Bomb placed near player.';
+                }, 500);
+            }
+        }
+
+        function resetTest() {
+            // Reset test statistics
+            testStats = {
+                score: 0,
+                bombsPlaced: 0,
+                blocksDestroyed: 0,
+                playersAlive: 4
+            };
+            
+            // Restart the test
+            bombTest.stop();
+            setTimeout(() => {
+                bombTest = new BombermanGame(document.getElementById('bomb-test'), {
+                    send: (data) => {
+                        console.log('Bomb test WebSocket:', data);
+                    }
+                });
+                bombTest.start();
+                document.getElementById('status-display').textContent = '🔄 Test reset! Ready for new bomb interaction tests.';
+            }, 1000);
+        }
+
+        // Override the addScore method to track statistics
+        const originalAddScore = BombermanGame.prototype.addScore;
+        BombermanGame.prototype.addScore = function(points) {
+            originalAddScore.call(this, points);
+            testStats.score += points;
+            testStats.blocksDestroyed++;
+        };
+
+        // Override the damagePlayer method to track statistics
+        const originalDamagePlayer = BombermanGame.prototype.damagePlayer;
+        BombermanGame.prototype.damagePlayer = function(player) {
+            originalDamagePlayer.call(this, player);
+            testStats.playersAlive = this.players.size;
+        };
+    </script>
+</body>
+</html> 
