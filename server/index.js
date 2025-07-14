@@ -63,7 +63,7 @@ function handleMessage(ws, data) {
 function handleJoinWaitingRoom(ws, data) {
   const { nickname } = data;
   
-  // Add player to waiting room
+  // Add player to waiting room until palyers>2 ( to doo ....)and 20s pass 
   const player = {
     id: ws._id || Date.now().toString(),
     nickname,
@@ -80,7 +80,7 @@ function handleJoinWaitingRoom(ws, data) {
     players: gameState.waitingRoom.players.map(p => ({ id: p.id, nickname: p.nickname }))
   });
   
-  // Check if we should start countdown
+  // Check if we should start countdown // will be after palyers>2
   checkStartCountdown();
 }
 
@@ -159,7 +159,7 @@ function checkStartCountdown() {
     }, 20000);
   }
   
-  if (playerCount === 4) {
+  if (playerCount === 4 || playerCount==1) {
     // Start 10 second countdown immediately
     if (gameState.waitingRoom.countdown) {
       clearTimeout(gameState.waitingRoom.countdown);
@@ -210,7 +210,7 @@ function startGame() {
     if (gameState.gameEngine && gameState.gameEngine.gameStatus === 'playing') {
       broadcastGameState();
     }
-  }, 16); // 60 FPS for smooth game state updates
+  }, 16); // 60 FPS mafoker 
 }
 
 // API routes

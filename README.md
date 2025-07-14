@@ -479,16 +479,17 @@ tryToMove(player) {
 }
 
 canMove(player, nextGridX, nextGridY) {
-    // Check map boundaries
+    console.log("!!!!!!!","neeext ")
+    //   return false if map boundres 
     if (nextGridX < 0 || nextGridY < 0 || 
         nextGridY >= this.mapArray.length || 
         nextGridX >= this.mapArray[0].length) {
         return false;
     }
 
-    // Check if tile is walkable (only grass is walkable)
+    // Check if tile is walkable (only grass is walkable) && 3 
     const tileType = this.mapArray[nextGridY][nextGridX];
-    if (tileType !== 1) {
+    if ((tileType !== 1) || tileType !==3) {
         return false;
     }
 

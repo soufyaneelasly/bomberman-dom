@@ -45,7 +45,7 @@ class BombermanGameEngine {
             for (let x = 1; x < this.mapArray[y].length - 1; x++) {
                 // Only place blocks if it's grass and not a wall
                 if (this.mapArray[y][x] === 1 && Math.random() < 0.6) {
-                    this.mapArray[y][x] = 2; // 60% chance for destructible block
+                    this.mapArray[y][x] = 2; // 60% chance for destructible block 
                 }
             }
         }
@@ -75,15 +75,15 @@ class BombermanGameEngine {
                 nextPixelX: position.pixelX,
                 nextPixelY: position.pixelY,
                 isMoving: false,
-                currentDirection: 'down',
+                currentDirection: 'up',
                 lives: 3,
                 maxBombs: 1,
                 bombRange: 1,
-                speed: 4,
+                speed: 3,
                 pressedDirections: [],
                 frameIndex: 0,
                 stepCount: 0,
-                stepsPerFrame: 5
+                stepsPerFrame: 3
             };
             
             this.players.set(playerId, player);
@@ -102,6 +102,7 @@ class BombermanGameEngine {
 
         switch (action) {
             case 'MOVE':
+                console.log("mooooooooove")
                 this.handleMovement(player, key);
                 break;
             case 'KEY_RELEASE':
@@ -118,6 +119,7 @@ class BombermanGameEngine {
         if (!player.pressedDirections.includes(key)) {
             player.pressedDirections.push(key);
         }
+        console.log(key,"keeey")
 
         // Set direction based on key
         switch (key) {
@@ -132,6 +134,8 @@ class BombermanGameEngine {
                 break;
             case 'arrowright':
                 player.currentDirection = 'right';
+            // case 'destroy':
+               // player.currentDirection='destroy'
                 break;
         }
 
@@ -157,7 +161,7 @@ class BombermanGameEngine {
         if (player.pressedDirections.length === 0) return;
         
         
-        console.log("@@@@@@@",this.mapArray[gridY][gridX])
+        // console.log("@@@@@@@",this.mapArray[gridY][gridX])
 
 
 
@@ -165,7 +169,7 @@ class BombermanGameEngine {
         const direction = player.pressedDirections[player.pressedDirections.length - 1];
         let nextGridX = player.gridX;
         let nextGridY = player.gridY;
-        console.log("direction")
+        console.log(player.pressedDirections[player.pressedDirections.length - 1],"fxxxxkl")
  
         
 
@@ -185,6 +189,7 @@ class BombermanGameEngine {
         }
 
         if (this.canMove(player, nextGridX, nextGridY)) {
+            console.log("kan move a ikhaaan",nextGridX,nextGridY)
             player.nextPixelX = nextGridX * this.tileSize;
             player.nextPixelY = nextGridY * this.tileSize;
             player.isMoving = true;
@@ -192,8 +197,11 @@ class BombermanGameEngine {
     }
 
     canMove(player, nextGridX, nextGridY) {
-        console.log("@@@@@@@",this.mapArray[nextGridY][nextGridX])
+        // console.log("@@@@@@@",this.mapArray[nextGridY][nextGridX])
         // Check map boundaries
+        console.log("txeker west can move ",nextGridX,nextGridY)
+        console.log("hakak a rwiiijl",this.mapArray[nextGridY][nextGridX])
+
         if (nextGridX < 0 || nextGridY < 0 || 
             nextGridY >= this.mapArray.length || 
             nextGridX >= this.mapArray[0].length) {
@@ -203,7 +211,7 @@ class BombermanGameEngine {
         // Check if tile is walkable (only grass is walkable) and the 3 the 3 is the triangle of initial position of the player 
 
         const tileType = this.mapArray[nextGridY][nextGridX];
-        if ((tileType !== 1) || (tileType!==3)) {
+        if ((tileType !== 1) && (tileType!==3)) {
             return false;
         }
 
@@ -288,7 +296,7 @@ class BombermanGameEngine {
     }
 
     updatePlayerMovement(player, deltaTime) {
-        console.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+        // console.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvv")
         const diffX = Math.abs(player.pixelX - player.nextPixelX);
         const diffY = Math.abs(player.pixelY - player.nextPixelY);
 
@@ -363,7 +371,7 @@ class BombermanGameEngine {
             id: explosionId,
             gridX: gridX,
             gridY: gridY,
-            timer: 2000 // 2 seconds
+            timer: 1000 // 2 seconds
         };
         
         this.explosions.set(explosionId, explosion);
@@ -423,7 +431,7 @@ class BombermanGameEngine {
 
     damagePlayer(player) {
         player.lives--;
-        console.log("xxxxxxxxxxxxxxxxxxxxx")
+        console.log("xxxxxxxxxxxxxxxxxxxxx,damage --",player)
         if (player.lives <= 0) {
             // Player is dead
             player.currentDirection = 'destroy';
@@ -440,7 +448,8 @@ class BombermanGameEngine {
     }
 
     spawnPowerUp(gridX, gridY) {
-        const powerUpTypes = ['bomb', 'flame', 'speed'];
+        const powerUpTypes = ['bombx', 'flame', 'speed'];
+        // const powerUpTypes=['flame']
         const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
         
         const powerUpId = `powerup_${Date.now()}_${gridX}_${gridY}`;
