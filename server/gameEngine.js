@@ -18,8 +18,8 @@ class BombermanGameEngine {
         // Use your original map structure (25x21)
         this.mapArray = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0],
+            [0, 3,3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 0],
+            [0, 3, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0],
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
             [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -35,17 +35,17 @@ class BombermanGameEngine {
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
             [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 3, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 3, 0],
+            [0, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         ];
         
-        // Randomize some blocks (like your original system)
+        // Randomize some blocks (like original system)
         for (let y = 1; y < this.mapArray.length - 1; y++) {
             for (let x = 1; x < this.mapArray[y].length - 1; x++) {
                 // Only place blocks if it's grass and not a wall
-                if (this.mapArray[y][x] === 1 && Math.random() < 0.7) {
-                    this.mapArray[y][x] = 2; // 70% chance for destructible block
+                if (this.mapArray[y][x] === 1 && Math.random() < 0.6) {
+                    this.mapArray[y][x] = 2; // 60% chance for destructible block
                 }
             }
         }
@@ -79,7 +79,7 @@ class BombermanGameEngine {
                 lives: 3,
                 maxBombs: 1,
                 bombRange: 1,
-                speed: 4, // Increased speed for smoother movement
+                speed: 4,
                 pressedDirections: [],
                 frameIndex: 0,
                 stepCount: 0,
@@ -114,7 +114,7 @@ class BombermanGameEngine {
     }
 
     handleMovement(player, key) {
-        // Add direction to pressed directions (like your single-player version)
+        // Add direction to pressed directions 
         if (!player.pressedDirections.includes(key)) {
             player.pressedDirections.push(key);
         }
@@ -150,11 +150,24 @@ class BombermanGameEngine {
     }
 
     tryToMove(player) {
+        
+        
+        
+        
         if (player.pressedDirections.length === 0) return;
+        
+        
+        console.log("@@@@@@@",this.mapArray[gridY][gridX])
+
+
+
 
         const direction = player.pressedDirections[player.pressedDirections.length - 1];
         let nextGridX = player.gridX;
         let nextGridY = player.gridY;
+        console.log("direction")
+ 
+        
 
         switch (direction) {
             case 'arrowup':
@@ -179,6 +192,7 @@ class BombermanGameEngine {
     }
 
     canMove(player, nextGridX, nextGridY) {
+        console.log("@@@@@@@",this.mapArray[nextGridY][nextGridX])
         // Check map boundaries
         if (nextGridX < 0 || nextGridY < 0 || 
             nextGridY >= this.mapArray.length || 
@@ -186,13 +200,18 @@ class BombermanGameEngine {
             return false;
         }
 
-        // Check if tile is walkable (only grass is walkable)
+        // Check if tile is walkable (only grass is walkable) and the 3 the 3 is the triangle of initial position of the player 
+
         const tileType = this.mapArray[nextGridY][nextGridX];
-        if (tileType !== 1) {
+        if ((tileType !== 1) || (tileType!==3)) {
             return false;
         }
 
-        // Check if position is blocked by bomb
+        // Check if position is blocked by bomb 
+        // you cant move up of the boobms 
+        // we always tcheck rthe next move
+
+    
         if (this.isPositionBlocked(nextGridX, nextGridY)) {
             return false;
         }
@@ -202,6 +221,8 @@ class BombermanGameEngine {
 
     isPositionBlocked(gridX, gridY) {
         // Check if there's a bomb at this position
+        // not valid if coord[boomb]==next coord[hero]
+
         for (const bomb of this.bombs.values()) {
             if (bomb.gridX === gridX && bomb.gridY === gridY) {
                 return true;
@@ -215,11 +236,17 @@ class BombermanGameEngine {
         const bombAtPosition = Array.from(this.bombs.values()).find(bomb => 
             bomb.gridX === player.gridX && bomb.gridY === player.gridY
         );
+         
+             
+        // we dont place boomb if already exite   
         
-        if (bombAtPosition) {
-            return; // Don't place bomb if one already exists
+         
+
+         if (bombAtPosition) {
+            return; 
         }
 
+        ///the player can put twpo boombs so the defrence will be the timming of it ahahahahah
         const bombId = `bomb_${Date.now()}_${player.id}`;
         const bomb = {
             id: bombId,
@@ -261,6 +288,7 @@ class BombermanGameEngine {
     }
 
     updatePlayerMovement(player, deltaTime) {
+        console.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvv")
         const diffX = Math.abs(player.pixelX - player.nextPixelX);
         const diffY = Math.abs(player.pixelY - player.nextPixelY);
 
@@ -305,6 +333,10 @@ class BombermanGameEngine {
             { dx: 1, dy: 0 },  // Right
             { dx: -1, dy: 0 }  // Left
         ];
+
+
+        ///all sens  up and dowm and left and right 
+             
 
         // Create explosion at bomb position
         this.createExplosion(bomb.gridX, bomb.gridY);
@@ -381,6 +413,7 @@ class BombermanGameEngine {
     }
 
     checkPlayerHit(gridX, gridY) {
+        /// for all players chek of enyone is in the range of any boomb 
         this.players.forEach((player, playerId) => {
             if (player.gridX === gridX && player.gridY === gridY) {
                 this.damagePlayer(player);
@@ -390,7 +423,7 @@ class BombermanGameEngine {
 
     damagePlayer(player) {
         player.lives--;
-        
+        console.log("xxxxxxxxxxxxxxxxxxxxx")
         if (player.lives <= 0) {
             // Player is dead
             player.currentDirection = 'destroy';
