@@ -98,11 +98,13 @@ class BombermanApp {
             case 'CHAT_MESSAGE':
                 this.addChatMessage(data.nickname, data.message);
                 break;
+            
             case 'GAME_STARTING':
                 this.showCountdown(data.countdown);
                 break;
             case 'GAME_STARTED':
                 this.startGame();
+                
                 break;
             case 'GAME_STATE_UPDATE':
                 this.updateGameState(data.gameState);
@@ -147,9 +149,15 @@ class BombermanApp {
         const messageElement = document.createElement('div');
         messageElement.className = 'chat-message';
         messageElement.innerHTML = `<span class="nickname">${nickname}:</span> ${message}`;
-        
-        this.chatMessages.appendChild(messageElement);
-        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+
+        // Show in correct chat area depending on screen
+        if (this.gameScreen.classList.contains('active')) {
+            this.gameChatMessages.appendChild(messageElement);
+            this.gameChatMessages.scrollTop = this.gameChatMessages.scrollHeight;
+        } else {
+            this.chatMessages.appendChild(messageElement);
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        }
     }
 
     sendChatMessage() {

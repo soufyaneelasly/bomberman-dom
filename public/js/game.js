@@ -383,6 +383,20 @@ class BombermanGame {
         this.renderBombs();
         this.renderPowerUps();
         this.renderExplosions();
+
+        // Update player stats header for the local player
+        const localNickname = window.app && window.app.nickname;
+        if (localNickname) {
+            const localPlayer = this.gameState.players.find(p => p.nickname === localNickname);
+            if (localPlayer) {
+                const livesElem = document.getElementById('stat-lives');
+                const speedElem = document.getElementById('stat-speed');
+                const bombsElem = document.getElementById('stat-bombs');
+                if (livesElem) livesElem.textContent = localPlayer.lives;
+                if (speedElem) speedElem.textContent = localPlayer.speed;
+                if (bombsElem) bombsElem.textContent = localPlayer.maxBombs;
+            }
+        }
     }
 
     start() {

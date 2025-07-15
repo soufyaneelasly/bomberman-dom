@@ -9,6 +9,13 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+// server.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// }); 
+
+
+
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -25,10 +32,16 @@ const gameState = {
   gameEngine: null
 };
 
-// WebSocket connection handling
+// WebSocket connection handling server listening for new ws connections
 wss.on('connection', (ws) => {
   console.log('New client connected');
-  
+  // the message is the data sent by the client to the server
+  //ws is the soket for this client
+  // When a client connects, a ws object is created for that client.
+
+
+ 
+
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
@@ -89,7 +102,7 @@ function handleChatMessage(ws, data) {
   const player = gameState.waitingRoom.players.find(p => p.ws === ws);
   
   if (player) {
-    broadcastToWaitingRoom({
+    broadcastToAllPlayers({
       type: 'CHAT_MESSAGE',
       playerId: player.id,
       nickname: player.nickname,
@@ -100,7 +113,7 @@ function handleChatMessage(ws, data) {
 
 function handleGameAction(ws, data) {
   if (!gameState.gameEngine) return;
-  
+  //find the player by ws
   const player = gameState.waitingRoom.players.find(p => p.ws === ws);
   if (!player) return;
   
@@ -125,6 +138,16 @@ function handleDisconnect(ws) {
 }
 
 function broadcastToWaitingRoom(message) {
+  gameState.waitingRoom.players.forEach(player => {
+    if (player.ws.readyState === WebSocket.OPEN) {
+      console.log("amin aaamiin")
+      
+      player.ws.send(JSON.stringify(message));
+    }
+  });
+}
+
+function broadcastToAllPlayers(message) {
   gameState.waitingRoom.players.forEach(player => {
     if (player.ws.readyState === WebSocket.OPEN) {
       player.ws.send(JSON.stringify(message));
