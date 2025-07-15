@@ -1,3 +1,32 @@
+# Socket Communication Overview
+
+This project uses WebSockets for real-time communication between the client (browser) and the Node.js server. All player actions (movement, bomb placement, etc.) are sent from the client to the server via WebSocket messages. The server processes these actions, updates the game state, and broadcasts the updated state to all connected clients at 60 FPS. This ensures all players see the same game world in real time.
+
+**How it works:**
+- The client sends actions (move, place bomb, etc.) to the server as JSON messages over WebSocket.
+- The server updates the game state and broadcasts the new state to all clients.
+- The client receives game state updates and re-renders the game accordingly.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+
+    Client->>Server: Connect (WebSocket)
+    Server-->>Client: Welcome/initial state
+
+    Client->>Server: { type: 'GAME_ACTION', action: 'MOVE', key: 'arrowup' }
+    Server->>Server: Update game state
+    Server-->>Client: { type: 'GAME_STATE_UPDATE', gameState: ... }
+    Server-->>Other Clients: { type: 'GAME_STATE_UPDATE', gameState: ... }
+
+    Client->>Server: { type: 'GAME_ACTION', action: 'PLACE_BOMB' }
+    Server->>Server: Update game state
+    Server-->>All Clients: { type: 'GAME_STATE_UPDATE', gameState: ... }
+```
+
+---
+
 # Bomberman Multiplayer Game
 
 A real-time multiplayer Bomberman game built with Node.js WebSocket backend and vanilla JavaScript frontend using DOM manipulation.
@@ -822,7 +851,6 @@ Create `public/index.html`:
 ```
 
 **Note**: The framework.js script is loaded before game.js to ensure the MockFramework is available.
-```
 
 ### Step 10: Client-Side Game Logic with Framework Integration
 

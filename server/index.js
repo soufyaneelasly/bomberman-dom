@@ -150,7 +150,7 @@ function broadcastGameState() {
 function checkStartCountdown() {
   const playerCount = gameState.waitingRoom.players.length;
   
-  if (playerCount >= 2 && !gameState.waitingRoom.countdown) {
+  if (playerCount == 4 && !gameState.waitingRoom.countdown) {
     // Start 20 second wait timer
     gameState.waitingRoom.countdown = setTimeout(() => {
       if (gameState.waitingRoom.players.length >= 2) {

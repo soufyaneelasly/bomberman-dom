@@ -530,7 +530,7 @@ class BombermanGameEngine {
             this.lastUpdate = now;
             
             this.updateGame(deltaTime);
-        }, 16); // ~60 FPS
+        }, 16); // >>60 FPS
     }
 
     getGameState() {
