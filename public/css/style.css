@@ -308,3 +308,62 @@ body {
     margin-right: 4px;
     filter: drop-shadow(0 1px 2px rgba(102,126,234,0.10));
 } 
+
+.explosion {
+    opacity: 1;
+  pointer-events: none;
+  width: 32px;
+  height: 32px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: absolute;
+  z-index: 6;
+  /* Optionally add a simple animation */
+  animation: explosion-fade 0.4s linear;
+}
+
+@keyframes explosion-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+} 
+
+.player-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 12px;
+  background: rgba(34,34,34,0.85);
+  border-radius: 8px;
+  padding: 8px 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.player-header img {
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.10));
+}
+.player-header-value {
+  font-weight: bold;
+  font-size: 20px;
+  color: #fff;
+  min-width: 24px;
+  text-align: center;
+  letter-spacing: 1px;
+} 
+
+.fps-counter {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  color: #fff;
+  background: rgba(0,0,0,0.6);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: monospace;
+  z-index: 1000;
+  pointer-events: none;
+  letter-spacing: 1px;
+} 
+
+ 
