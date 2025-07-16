@@ -97,6 +97,14 @@ function NicknameScreen(store) {
     children: [
       { tag: 'h1', children: ['Bomberman DOM'] },
       {
+        tag: 'div',
+        attrs: { style: 'display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 10px;' },
+        children: [
+          { tag: 'img', attrs: { src: '/assets/gameconsole.png', alt: 'Game Console', style: 'width: 80px; filter: drop-shadow(0 4px 12px #764ba2aa);' } },
+          { tag: 'div', attrs: { style: "font-size: 1.1rem; color: #764ba2; font-family: 'Press Start 2P', 'VT323', 'Arial', sans-serif; text-shadow: 0 2px 8px #e0e7ff;" }, children: ['Welcome to our game!'] }
+        ]
+      },
+      {
         tag: 'input',
         attrs: {
           type: 'text',

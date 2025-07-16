@@ -366,4 +366,48 @@ body {
   letter-spacing: 1px;
 } 
 
+/* --- Enhanced Game Input Styles --- */
+#nickname-input, #chat-input, #game-chat-input {
+    font-family: 'Press Start 2P', 'VT323', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #f8f9fa 60%, #e0e7ff 100%);
+    border: 2px solid #764ba2;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px 0 rgba(102, 126, 234, 0.10), 0 0 8px #667eea44;
+    padding: 14px 16px;
+    font-size: 17px;
+    color: #333;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+}
+#nickname-input:focus, #chat-input:focus, #game-chat-input:focus {
+    border-color: #ffb347;
+    box-shadow: 0 0 0 3px #ffb34755, 0 2px 12px 0 rgba(102, 126, 234, 0.15);
+}
+#join-btn, #send-chat-btn, #game-send-btn {
+    font-family: 'Press Start 2P', 'VT323', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #ffb347 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10), 0 0 8px #764ba244;
+    padding: 14px 28px;
+    font-size: 17px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+    margin-left: 0;
+}
+#join-btn:hover, #send-chat-btn:hover, #game-send-btn:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #ffb347 100%);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 16px #ffb34755, 0 2px 12px 0 rgba(102, 126, 234, 0.18);
+}
+#join-btn:active, #send-chat-btn:active, #game-send-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px #764ba244;
+}
+/* --- End Enhanced Game Input Styles --- */ 
+
+/* --- Enhanced Nickname Screen Input & Button Styles --- */
  
