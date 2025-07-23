@@ -21,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/assets', express.static(path.join(__dirname, '../assets')));
+app.use('/core', express.static(path.join(__dirname, '../core')));
 
 // Game state
 const gameState = {
@@ -31,6 +32,12 @@ const gameState = {
   },
   gameEngine: null
 };
+
+// Add these variables to manage timers
+let waitingRoom20sTimer = null;
+let waitingRoom20sInterval = null;
+let waitingRoom10sTimer = null;
+let waitingRoom10sCountdown = null;
 
 // WebSocket connection handling server listening for new ws connections
 wss.on('connection', (ws) => {
@@ -74,6 +81,11 @@ function handleMessage(ws, data) {
 }
 
 function handleJoinWaitingRoom(ws, data) {
+  // If a game is in progress, reject join
+  if (gameState.gameEngine && gameState.gameEngine.gameStatus === 'playing') {
+    ws.send(JSON.stringify({ type: 'MATCH_ALREADY_STARTED', message: 'A match is already in progress. Please wait for the next game.' }));
+    return;
+  }
   const { nickname } = data;
   
   // Add player to waiting room until palyers>2 ( to doo ....)and 20s pass 
@@ -172,38 +184,65 @@ function broadcastGameState() {
 
 function checkStartCountdown() {
   const playerCount = gameState.waitingRoom.players.length;
-  
-  if (playerCount == 4 && !gameState.waitingRoom.countdown) {
-    // Start 20 second wait timer
-    gameState.waitingRoom.countdown = setTimeout(() => {
-      if (gameState.waitingRoom.players.length >= 2) {
+
+  // Reset all timers if not enough players
+  if (playerCount < 2) {
+    if (waitingRoom20sTimer) { clearTimeout(waitingRoom20sTimer); waitingRoom20sTimer = null; }
+    if (waitingRoom20sInterval) { clearInterval(waitingRoom20sInterval); waitingRoom20sInterval = null; }
+    if (waitingRoom10sTimer) { clearTimeout(waitingRoom10sTimer); waitingRoom10sTimer = null; }
+    if (waitingRoom10sCountdown) { clearInterval(waitingRoom10sCountdown); waitingRoom10sCountdown = null; }
+    gameState.waitingRoom.countdown = null;
+    return;
+  }
+
+  // If 2 or 3 players, start 20s timer if not already started
+  if ((playerCount === 2 || playerCount === 3) && !waitingRoom20sTimer && !waitingRoom10sCountdown) {
+    let waitingCountdown = 20;
+    gameState.waitingRoom.countdown = waitingCountdown;
+    waitingRoom20sInterval = setInterval(() => {
+      waitingCountdown--;
+      gameState.waitingRoom.countdown = waitingCountdown;
+      broadcastToWaitingRoom({
+        type: 'WAITING_TIMER',
+        countdown: waitingCountdown
+      });
+      if (waitingCountdown <= 0) {
+        clearInterval(waitingRoom20sInterval);
+        waitingRoom20sInterval = null;
+      }
+    }, 1000);
+    waitingRoom20sTimer = setTimeout(() => {
+      waitingRoom20sTimer = null;
+      if (waitingRoom20sInterval) { clearInterval(waitingRoom20sInterval); waitingRoom20sInterval = null; }
+      // After 20s, start 10s countdown if still 2 or 3 players
+      if (gameState.waitingRoom.players.length >= 2 && gameState.waitingRoom.players.length < 4 && !waitingRoom10sCountdown) {
         startGameCountdown();
       }
     }, 20000);
+    // Optionally broadcast 20s timer started
   }
-  
-  if (playerCount === 4 || playerCount==1) {
-    // Start 10 second countdown immediately
-    if (gameState.waitingRoom.countdown) {
-      clearTimeout(gameState.waitingRoom.countdown);
-    }
+
+  // If 4 players join before 20s, cancel 20s timer and start 10s countdown
+  if (playerCount === 4 && !waitingRoom10sCountdown) {
+    if (waitingRoom20sTimer) { clearTimeout(waitingRoom20sTimer); waitingRoom20sTimer = null; }
+    if (waitingRoom20sInterval) { clearInterval(waitingRoom20sInterval); waitingRoom20sInterval = null; }
     startGameCountdown();
   }
 }
 
 function startGameCountdown() {
   let countdown = 10;
-  
-  const countdownInterval = setInterval(() => {
+  gameState.waitingRoom.countdown = countdown;
+  waitingRoom10sCountdown = setInterval(() => {
     broadcastToWaitingRoom({
       type: 'GAME_STARTING',
       countdown
     });
-    
     countdown--;
-    
+    gameState.waitingRoom.countdown = countdown;
     if (countdown < 0) {
-      clearInterval(countdownInterval);
+      clearInterval(waitingRoom10sCountdown);
+      waitingRoom10sCountdown = null;
       startGame();
     }
   }, 1000);

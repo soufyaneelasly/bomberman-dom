@@ -1,5 +1,4 @@
-يا رب، ليكن جمالك علينا، وبارك عمل أيدينا. كما باركت يوسف في عمله، باركنا أنت أيضًا. افتح لنا أبواب النجاح والرحمة، واجعل كل ما تمتد إليه أيدينا مزدهرًا ومباركًا. آمين.
-
+ 
 
 bomberman-dom
 You certainly know bomberman right? Good good. You will make it. Relax, is not that hard, it is only a multiplayer version of it. Ah and forgot to mention that you will need to do it using the framework you created a while ago. Let me explain.
