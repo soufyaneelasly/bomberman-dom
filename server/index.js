@@ -74,6 +74,16 @@ function handleMessage(ws, data) {
     case 'GAME_ACTION':
       handleGameAction(ws, data);
       break;
+    case 'win': case 'lose': {
+        store.setState({
+          winner: payload,
+          screen: 'winner',
+          gameStarted: false,
+          error: '',
+          type: type
+        });
+        break;
+      }
     default:
       console.log('Unknown message type:', data.type);
   }
@@ -138,13 +148,36 @@ function handleGameAction(ws, data) {
 function handleDisconnect(ws) {
   // Remove player from waiting room
   const index = gameState.waitingRoom.players.findIndex(p => p.ws === ws);
+  let playerId = null;
   if (index !== -1) {
+    playerId = gameState.waitingRoom.players[index].id;
     gameState.waitingRoom.players.splice(index, 1);
-    
     broadcastToWaitingRoom({
       type: 'PLAYER_LEFT',
       players: gameState.waitingRoom.players.map(p => ({ id: p.id, nickname: p.nickname }))
     });
+  }
+  // If game is running, set player lives to 0 and broadcast
+  if (gameState.gameEngine && playerId) {
+    const player = gameState.gameEngine.players.get(playerId);
+    if (player) {
+      player.lives = 0;
+    }
+    broadcastGameState();
+    // Check if only one or zero players are alive
+    const alivePlayers = Array.from(gameState.gameEngine.players.values()).filter(p => p.lives > 0);
+    if (alivePlayers.length <= 1) {
+      // Reset game state to initial
+      gameState.gameEngine.endGame();
+      gameState.gameEngine = null;
+      gameState.waitingRoom.players = [];
+      gameState.waitingRoom.countdown = null;
+      // Optionally broadcast a reset message
+      broadcastToAllPlayers({
+        type: 'GAME_RESET',
+        message: 'Game has been reset due to not enough players.'
+      });
+    }
   }
 }
 
@@ -282,7 +315,7 @@ app.get('/api/health', (req, res) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-}); 
+});
 
 
 
