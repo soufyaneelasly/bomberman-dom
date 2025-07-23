@@ -159,22 +159,12 @@ class BombermanGameEngine {
 
     tryToMove(player) {
         
-        
-        
-        
         if (player.pressedDirections.length === 0) return;
-        
-        
- 
-
-
-
+  
         const direction = player.pressedDirections[player.pressedDirections.length - 1];
         let nextGridX = player.gridX;
         let nextGridY = player.gridY;
   
-        
-
         switch (direction) {
             case 'arrowup':
                 nextGridY--;

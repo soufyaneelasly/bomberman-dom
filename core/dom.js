@@ -1,5 +1,3 @@
-//mini-framework/src/dom.js
-
 // Batch DOM operations to minimize reflows
 class DOMBatcher {
   constructor() {
@@ -236,12 +234,6 @@ function diff(oldVdom, newVdom, parent, index = 0) {
 
 // Optimized children diffing with better reordering
 function diffChildren(oldChildren, newChildren, parent) {
-  // Only element nodes can have children
-  if (!(parent instanceof Element)) return;
-  // Optionally, skip void elements (input, img, etc.)
-  const voidTags = new Set(['AREA','BASE','BR','COL','EMBED','HR','IMG','INPUT','LINK','META','PARAM','SOURCE','TRACK','WBR']);
-  if (voidTags.has(parent.tagName)) return;
-
   const oldKeyed = new Map();
   const oldUnkeyed = [];
   const existingNodes = Array.from(parent.childNodes);

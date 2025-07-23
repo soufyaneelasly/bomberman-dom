@@ -1,6 +1,3 @@
-//mini-framework/src/dom.js
-
-
 // ========== Internal State ==========
 const targetMap = new WeakMap()
 const reactiveCache = new WeakMap()
